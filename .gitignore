@@ -1,2 +1,7 @@
 sobelf
 notes.md
+obj/*
+.vscode/*
+images/processed/*
+old_test.py
+temp
