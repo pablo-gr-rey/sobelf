@@ -3,18 +3,19 @@ Usage:
 python test.py [input] [-N N] [-n n] [-t numThreads] [-o output]
 
 run ./sobelf on the given outputgif with the specified number of tasks, nodes and threads.
-input defaults to images/original/Mandelbrot-large.gif
-output defaults to /dev/null as we are mostly interested in the filtering part.
+N, n and t default to 1
+input defaults to DEFAULT_INPUT
+output defaults to DEFAULT_OUTPUT
 
 À utiliser avec eval "$(python gen_cmd.py -t 8)"
 """
 
 import argparse
 
-DEFAULT_INPUT = "images/original/Mandelbrot-large.gif"
-DEFAULT_OUTPUT = "/dev/null"
+DEFAULT_INPUT = "images/original/mandelbrot1.gif"
+DEFAULT_OUTPUT = "images/processed/mandelbrot1-sobelf.gif"
 
-COMMAND = "OMP_NUM_THREADS={t} salloc -N {N} -n {n} mpirun ./sobelf {input} {o}"
+COMMAND = "OMP_NUM_THREADS={t} salloc -N {N} -n {n} --cpus-per-task {t} mpirun --map-by socket:pe={t} --bind-to core ./sobelf {input} {o}"
 
 parser = argparse.ArgumentParser(prog="test", description="Run sobelf on the given file")
 

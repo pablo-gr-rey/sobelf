@@ -157,9 +157,9 @@ animated_gif* load_pixels(char* filename)
         if (g->SavedImages[i].ImageDesc.ColorMap)
         {
 
-            /* TODO No support for local color map */
-            fprintf(stderr, "Error: application does not support local colormap\n");
-            return NULL;
+            // MODIFICATION: we now support local color map (yay!)
+            // fprintf(stderr, "Error: application does not support local colormap\n");
+            // return NULL;
 
             colmap = g->SavedImages[i].ImageDesc.ColorMap;
         }
@@ -170,6 +170,15 @@ animated_gif* load_pixels(char* filename)
             int c;
 
             c = g->SavedImages[i].RasterBits[j];
+
+            // MODIFICATION: use last frame color for SBackGroundColor
+            if (c == g->SBackGroundColor)
+            {
+                if (i == 0)
+                    p[i][j] = (pixel){ 0, 0, 0 };
+                else
+                    p[i][j] = p[i - 1][j];
+            }
 
             p[i][j].r = colmap->Colors[c].Red;
             p[i][j].g = colmap->Colors[c].Green;
@@ -546,6 +555,11 @@ int store_pixels(char* filename, animated_gif* image)
     /* Update the raster bits according to color map */
     for (i = 0; i < image->n_images; i++)
     {
+        // MODIFICATION: remove local color map for each image
+        // otherwise, we use the local color map of the corresponding image in the original gif
+
+        image->g->SavedImages[i].ImageDesc.ColorMap = NULL;
+
         for (j = 0; j < image->width[i] * image->height[i]; j++)
         {
             int found_index = -1;
@@ -591,7 +605,7 @@ void apply_gray_filter(animated_gif* image)
 #endif
 #pragma omp for schedule(static)
 
-        for (i = 0; i < image->n_images; i++)
+        for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
         {
             for (j = 0; j < image->width[i] * image->height[i]; j++)
             {
@@ -619,7 +633,7 @@ void apply_gray_line(animated_gif* image)
 
     p = image->p;
 
-    for (i = 0; i < image->n_images; i++)
+    for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
     {
         for (j = 0; j < 10; j++)
         {
@@ -654,7 +668,7 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
         printf("Blur filter applied by thread %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
 #endif
 #pragma omp for schedule(static)
-        for (i = 0; i < image->n_images; i++)
+        for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
         {
             n_iter = 0;
             width = image->width[i];
@@ -799,7 +813,7 @@ void apply_sobel_filter(animated_gif* image)
         printf("Sobel filter applied by thread %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
 #endif
 #pragma omp for schedule(static)
-        for (i = 0; i < image->n_images; i++)
+        for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
         {
             width = image->width[i];
             height = image->height[i];
@@ -881,6 +895,8 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
+    printf("MPI rank %d size %d\n", mpi_rank, mpi_size);
+
     char* input_filename;
     char* output_filename;
     animated_gif* image;
@@ -928,6 +944,12 @@ int main(int argc, char** argv)
 
     /* Apply sobel filter on pixels */
     apply_sobel_filter(image);
+
+    // now, we need to gather all images (there are ceil(n_images / mpi_size) per node at most)
+    // for (int k = 0; k * mpi_size < image->n_images; k++)
+    // {
+    //     printf("receiving image no. %d from others\n", k);
+    // }
 
     /* FILTER Timer stop */
     gettimeofday(&t2, NULL);
