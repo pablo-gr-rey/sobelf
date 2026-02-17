@@ -1,0 +1,48 @@
+1  nodes :
+MPI rank 0 size 2
+MPI rank 1 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 1.398357 3.475190
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 1.482231 3.421432
+1.482231 3.421432
+2  nodes :
+MPI rank 0 size 2
+MPI rank 1 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 0.734470 3.483073
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.813780 3.421216
+0.813780 3.421216
+3  nodes :
+MPI rank 0 size 2
+MPI rank 1 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 0.564087 3.454239
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.612175 3.420871
+0.612175 3.420871
+4  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 0.425642 3.463346
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.486304 3.422938
+0.486304 3.422938
+5  nodes :
+MPI rank 0 size 2
+MPI rank 1 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 0.396991 3.425186
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.421624 3.420341
+0.421624 3.420341
+6  nodes :
+MPI rank 0 size 2
+MPI rank 1 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 0.347665 3.429210
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.377409 3.419048
+0.377409 3.419048
+7  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 0.327094 3.448667
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.371202 3.419928
+0.371202 3.419928
+8  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; process 1: duration1 duration2 0.281626 3.434438
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.316904 3.419169
+0.316904 3.419169

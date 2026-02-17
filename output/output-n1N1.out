@@ -1,0 +1,64 @@
+1  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 2.873432 0.000030
+2.873432 0.000030
+2  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 1.543935 0.000030
+1.543935 0.000030
+3  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 1.147838 0.000031
+1.147838 0.000031
+4  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.949434 0.000032
+0.949434 0.000032
+5  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.785110 0.000033
+0.785110 0.000033
+6  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.693020 0.000031
+0.693020 0.000031
+7  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.642417 0.000032
+0.642417 0.000032
+8  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.590002 0.000033
+0.590002 0.000033
+9  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.660726 0.000032
+0.660726 0.000032
+10  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.728355 0.000060
+0.728355 0.000060
+11  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.734351 0.000032
+0.734351 0.000032
+12  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.583593 0.000057
+0.583593 0.000057
+13  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.585124 0.000031
+0.585124 0.000031
+14  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.584908 0.000031
+0.584908 0.000031
+15  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.594510 0.000033
+0.594510 0.000033
+16  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; process 0: duration1 duration2 0.607406 0.000032
+0.607406 0.000032

@@ -14,7 +14,7 @@
 
  /* Set this macro to 1 to enable debugging information */
 #define SOBELF_DEBUG 0
-#define TEST_DEBUG 1
+#define TEST_DEBUG 0
 #define FULL_VERBOSE 0
 
 /* Represent one pixel from the image */
@@ -38,10 +38,7 @@ typedef struct animated_gif
 
 int mpi_rank, mpi_size;
 
-/*
- * Load a GIF image from a file and return a
- * structure of type animated_gif.
- */
+// Load a GIF image from a file and return a structure of type animated_gif.
 animated_gif* load_pixels(char* filename)
 {
     GifFileType* g;
@@ -605,7 +602,7 @@ void apply_gray_filter(animated_gif* image)
 #endif
 #pragma omp for schedule(static)
 
-        for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
+        for (i = mpi_rank; i < image->n_images; i += mpi_size)
         {
             for (j = 0; j < image->width[i] * image->height[i]; j++)
             {
@@ -633,7 +630,7 @@ void apply_gray_line(animated_gif* image)
 
     p = image->p;
 
-    for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
+    for (i = mpi_rank; i < image->n_images; i += mpi_size)
     {
         for (j = 0; j < 10; j++)
         {
@@ -668,7 +665,7 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
         printf("Blur filter applied by thread %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
 #endif
 #pragma omp for schedule(static)
-        for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
+        for (i = mpi_rank; i < image->n_images; i += mpi_size)
         {
             n_iter = 0;
             width = image->width[i];
@@ -813,7 +810,7 @@ void apply_sobel_filter(animated_gif* image)
         printf("Sobel filter applied by thread %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
 #endif
 #pragma omp for schedule(static)
-        for (i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++)
+        for (i = mpi_rank; i < image->n_images; i += mpi_size)
         {
             width = image->width[i];
             height = image->height[i];
@@ -900,7 +897,7 @@ int main(int argc, char** argv)
     char* input_filename;
     char* output_filename;
     animated_gif* image;
-    struct timeval t1, t2;
+    struct timeval t1, t2, t3;
     double duration;
 
     /* Check command-line arguments */
@@ -925,7 +922,6 @@ int main(int argc, char** argv)
 
     duration = (t2.tv_sec - t1.tv_sec) + ((t2.tv_usec - t1.tv_usec) / 1e6);
 
-
 #if FULL_VERBOSE
     printf("GIF loaded from file %s with %d image(s) in %lf s\n",
         input_filename, image->n_images, duration);
@@ -945,28 +941,86 @@ int main(int argc, char** argv)
     /* Apply sobel filter on pixels */
     apply_sobel_filter(image);
 
-    // now, we need to gather all images (there are ceil(n_images / mpi_size) per node at most)
-    // for (int k = 0; k * mpi_size < image->n_images; k++)
-    // {
-    //     printf("receiving image no. %d from others\n", k);
-    // }
-
-    /* FILTER Timer stop */
+    // SOBELF timer stop
     gettimeofday(&t2, NULL);
 
     duration = (t2.tv_sec - t1.tv_sec) + ((t2.tv_usec - t1.tv_usec) / 1e6);
 
+    // now, we need to gather all images (there are ceil(n_images / mpi_size) per node at most)
+
+    // int* tt1 = malloc(50 * sizeof(int)), * tt2 = malloc(100 * sizeof(int)), * t3 = malloc(100 * sizeof(int));
+    // int displs[2] = { 0, (t3 + 4) - tt1 };
+    // int recvcounts[2] = { 1, 1 };
+    // int val = mpi_rank ? 12 : 9;
+    // if (mpi_rank == 0)
+    // {
+    //     MPI_Gatherv(&val, 1, MPI_INT, tt1, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
+    //     printf("%d %d\n", tt1[0], t3[4]);
+    // }
+    // else
+    //     MPI_Gatherv(&val, 1, MPI_INT, NULL, NULL, NULL, NULL, 0, MPI_COMM_WORLD);
+
+    // the images are treated in a round-robin fashion: for 8 images and 3 nodes, it will be 0 1 2 0 1 2 0 1
+    // this means that there should be N//S common GatherV with displacements 0,1,..,S-1 ; S,S+1,..,2S-1 ; etc
+    // then (if N mod S != 0) a last GatherV with displacements S * (N // S) ; ... ; N-1 and the last S - (N mod S) nodes should not send anything
+
+    // since we cannot specify arbitrary receiving adresses but only displacements, we use somewhat cheesy pointer arithmetic
+    // being cautious about the fact that a pixel is (exactly) 3 ints
+    // ie. the 1st image treated by rank 1 should be copied from p[0] with displacement 3 * (int)(p[1] - p[0])
+    // it does not matter if recvbuffer is actually not a real buffer, we just need to specify displacements
+
+    int* displ = malloc(mpi_size * sizeof(int));
+    int* recvcount = malloc(mpi_size * sizeof(int));
+
+    // int* recv = malloc(image->n_images * sizeof(int));
+
+    for (int i = 0; i < image->n_images / mpi_size + (image->n_images % mpi_size != 0); i++)
+    {
+        // populate displ and recvcount
+        for (int k = 0; k < mpi_size; k++)
+        {
+            if (i * mpi_size + k < image->n_images)
+            {
+                // displ[k] = i * mpi_size + k;
+                // recvcount[k] = 1;
+                int image_no = i * mpi_size + k;
+                displ[k] = 3 * (int) (image->p[image_no] - image->p[0]);
+                recvcount[k] = 3 * image->width[image_no] * image->height[image_no];
+            }
+            else
+                displ[k] = recvcount[k] = 0;        // the last nodes shouldn't send anything at the last receive
+        }
+
+        void* source = i * mpi_size + mpi_rank < image->n_images ? (void*) (image->p[i * mpi_size + mpi_rank]) : NULL;
+
+        if (mpi_rank == 0)      // rank 0 receive and sends nothing (it already has the correct images)
+            MPI_Gatherv(NULL, 0, MPI_INT, image->p[0], recvcount, displ, MPI_INT, 0, MPI_COMM_WORLD);
+        else
+            MPI_Gatherv(source, recvcount[mpi_rank], MPI_INT, NULL, NULL, NULL, MPI_INT, 0, MPI_COMM_WORLD);
+    }
+
+    /* COMM Timer stop */
+    gettimeofday(&t3, NULL);
+
+    double duration2 = (t3.tv_sec - t2.tv_sec) + (t3.tv_usec - t2.tv_usec) / 1e6;
+
+    printf("process %d: duration1 duration2 %lf %lf\n", mpi_rank, duration, duration2);
+
+    if (mpi_rank == 0)
+    {
 #if FULL_VERBOSE
-    printf("SOBEL done in %lf s\n", duration);
+        printf("SOBEL done in %lf; COMMUNICATION done in %lf\n", duration, duration2);
 #else
-    printf("%lf\n", duration);
+        printf("%lf %lf\n", duration, duration2);
 #endif
+    }
 
     /* EXPORT Timer start */
     gettimeofday(&t1, NULL);
 
-    /* Store file from array of pixels to GIF file */
-    if (!store_pixels(output_filename, image)) { return 1; }
+    /* Store file from array of pixels to GIF file only for rank 0 */
+    if (mpi_rank == 0)
+        if (!store_pixels(output_filename, image)) { return 1; }
 
     /* EXPORT Timer stop */
     gettimeofday(&t2, NULL);

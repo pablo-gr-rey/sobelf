@@ -5,3 +5,5 @@ obj/*
 images/processed/*
 old_test.py
 temp
+.venv
+images/processed/big.gif
