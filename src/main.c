@@ -17,6 +17,18 @@
 #define TEST_DEBUG 0
 #define FULL_VERBOSE 0
 
+// uncomment this for round-robin mode (images will be treated by 0 1 2 3 0 1 2 3)
+// if not defined, images will be treated in blocks (0 0 1 1 2 2 3 3), which allows transferring data with a single gather
+
+#define ROUND_ROBIN
+
+// defines the images through which rank mpi_rank should go
+#ifdef ROUND_ROBIN
+#define LOOP_IMAGE i = mpi_rank; i < image->n_images; i += mpi_size
+#else
+#define LOOP_IMAGE i = mpi_rank * image->n_images / mpi_size; i < (mpi_rank + 1) * image->n_images / mpi_size; i++
+#endif
+
 /* Represent one pixel from the image */
 typedef struct pixel
 {
@@ -132,15 +144,31 @@ animated_gif* load_pixels(char* filename)
         return NULL;
     }
 
-    for (i = 0; i < n_images; i++)
+    // for (i = 0; i < n_images; i++)
+    // {
+    //     p[i] = (pixel*) malloc(width[i] * height[i] * sizeof(pixel));
+    //     if (p[i] == NULL)
+    //     {
+    //         fprintf(stderr, "Unable to allocate %d-th array of %d pixels\n",
+    //             i, width[i] * height[i]);
+    //         return NULL;
+    //     }
+    // }
+
+    // we allocate one big array per mpi rank to be able to send it all at once
+    for (int r = 0; r < mpi_size; r++)
     {
-        p[i] = (pixel*) malloc(width[i] * height[i] * sizeof(pixel));
-        if (p[i] == NULL)
-        {
-            fprintf(stderr, "Unable to allocate %d-th array of %d pixels\n",
-                i, width[i] * height[i]);
-            return NULL;
-        }
+        // this rank will handle images from r * n_images / size to (r+1) * n_images / size
+        int nPixels = 0;
+        for (int i = r * n_images / mpi_size; i < (r + 1) * n_images / mpi_size; i++)
+            nPixels += width[i] * height[i];
+
+        // allocate one big array for the whole rank
+        p[r * n_images / mpi_size] = (pixel*) malloc(nPixels * sizeof(pixel));
+
+        // update pointers for consecutive images
+        for (int i = r * n_images / mpi_size; i < (r + 1) * n_images / mpi_size - 1; i++)
+            p[i + 1] = p[i] + width[i] * height[i];
     }
 
     /* Fill pixels */
@@ -602,7 +630,7 @@ void apply_gray_filter(animated_gif* image)
 #endif
 #pragma omp for schedule(static)
 
-        for (i = mpi_rank; i < image->n_images; i += mpi_size)
+        for (LOOP_IMAGE)
         {
             for (j = 0; j < image->width[i] * image->height[i]; j++)
             {
@@ -630,7 +658,7 @@ void apply_gray_line(animated_gif* image)
 
     p = image->p;
 
-    for (i = mpi_rank; i < image->n_images; i += mpi_size)
+    for (LOOP_IMAGE)
     {
         for (j = 0; j < 10; j++)
         {
@@ -665,7 +693,7 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
         printf("Blur filter applied by thread %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
 #endif
 #pragma omp for schedule(static)
-        for (i = mpi_rank; i < image->n_images; i += mpi_size)
+        for (LOOP_IMAGE)
         {
             n_iter = 0;
             width = image->width[i];
@@ -810,7 +838,7 @@ void apply_sobel_filter(animated_gif* image)
         printf("Sobel filter applied by thread %d/%d\n", omp_get_thread_num(), omp_get_num_threads());
 #endif
 #pragma omp for schedule(static)
-        for (i = mpi_rank; i < image->n_images; i += mpi_size)
+        for (LOOP_IMAGE)
         {
             width = image->width[i];
             height = image->height[i];
@@ -960,6 +988,7 @@ int main(int argc, char** argv)
     // else
     //     MPI_Gatherv(&val, 1, MPI_INT, NULL, NULL, NULL, NULL, 0, MPI_COMM_WORLD);
 
+#ifdef ROUND_ROBIN
     // the images are treated in a round-robin fashion: for 8 images and 3 nodes, it will be 0 1 2 0 1 2 0 1
     // this means that there should be N//S common GatherV with displacements 0,1,..,S-1 ; S,S+1,..,2S-1 ; etc
     // then (if N mod S != 0) a last GatherV with displacements S * (N // S) ; ... ; N-1 and the last S - (N mod S) nodes should not send anything
@@ -998,6 +1027,30 @@ int main(int argc, char** argv)
         else
             MPI_Gatherv(source, recvcount[mpi_rank], MPI_INT, NULL, NULL, NULL, MPI_INT, 0, MPI_COMM_WORLD);
     }
+#else
+    // the images are treated 0 0 1 1 2 2 3 3
+    // rank r gets images from r * n / s to (r+1) * n / s, and we know that these images are allocated consecutively: we only need a single gather
+    // we use pointer arithmetic for displ, as we do not place everything in a single buffer
+    int* displ = malloc(mpi_size * sizeof(int));
+    int* recvcount = malloc(mpi_size * sizeof(int));
+
+    displ[0] = recvcount[0] = 0;
+    for (int k = 1; k < mpi_size; k++)
+    {
+        displ[k] = 3 * (int) (image->p[k * image->n_images / mpi_size] - image->p[0]);
+
+        int nPixels = 0;
+        for (int i = k * image->n_images / mpi_size; i < (k + 1) * image->n_images / mpi_size; i++)
+            nPixels += image->width[i] * image->height[i];
+        recvcount[k] = 3 * nPixels;
+    }
+
+    if (mpi_rank == 0)
+        // we should receive a single image array from all other ranks, since we know that images are consecutive for a single rank
+        MPI_Gatherv(NULL, 0, MPI_INT, image->p[0], recvcount, displ, MPI_INT, 0, MPI_COMM_WORLD);
+    else
+        MPI_Gatherv(image->p[mpi_rank * image->n_images / mpi_size], recvcount[mpi_rank], MPI_INT, NULL, NULL, NULL, MPI_INT, 0, MPI_COMM_WORLD);
+#endif
 
     /* COMM Timer stop */
     gettimeofday(&t3, NULL);
