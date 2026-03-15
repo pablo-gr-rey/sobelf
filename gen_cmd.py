@@ -14,8 +14,8 @@ python gen_cmd.py -h for full option list
 
 import argparse, sys, math
 
-DEFAULT_INPUT = "images/original/mandelbrot1.gif"
-DEFAULT_OUTPUT = "images/processed/mandelbrot1-sobelf.gif"
+DEFAULT_INPUT = "images/original/mandelbrot2.gif"
+DEFAULT_OUTPUT = "images/processed/mandelbrot2-sobelf.gif"
 
 # --map-by socket:pe={cpu} --bind-to core
 COMMAND = "OMP_NUM_THREADS={t} OMP_PLACES=cores OMP_PROC_BIND=close salloc --nodelist {nodes} -N {N} -n {n} --cpus-per-task {t} mpirun {report} --bind-to core --map-by socket:pe={t} ./sobelf {input} {o}"
