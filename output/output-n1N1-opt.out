@@ -1,0 +1,128 @@
+1  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.060638 blur 0.861620 sobelf 0.111155 total 1.033413
+process 0: duration1 duration2 1.033413 0.000009
+1.033413 0.000009
+storing pixels
+2  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.045632 blur 0.470070 sobelf 0.082762 total 0.598464
+process 0: duration1 duration2 0.598464 0.000008
+0.598464 0.000008
+storing pixels
+3  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.034734 blur 0.345898 sobelf 0.051677 total 0.432309
+process 0: duration1 duration2 0.432309 0.000009
+0.432309 0.000009
+storing pixels
+4  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.030968 blur 0.259567 sobelf 0.037811 total 0.328346
+process 0: duration1 duration2 0.328346 0.000008
+0.328346 0.000008
+storing pixels
+5  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.030731 blur 0.218661 sobelf 0.034597 total 0.283989
+process 0: duration1 duration2 0.283989 0.000008
+0.283989 0.000008
+storing pixels
+6  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.030182 blur 0.211826 sobelf 0.028026 total 0.270034
+process 0: duration1 duration2 0.270034 0.000008
+0.270034 0.000008
+storing pixels
+7  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.028536 blur 0.191653 sobelf 0.023854 total 0.244043
+process 0: duration1 duration2 0.244043 0.000009
+0.244043 0.000009
+storing pixels
+8  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.028132 blur 0.165041 sobelf 0.022407 total 0.215580
+process 0: duration1 duration2 0.215580 0.000009
+0.215580 0.000009
+storing pixels
+9  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.028299 blur 0.191585 sobelf 0.020655 total 0.240539
+process 0: duration1 duration2 0.240539 0.000009
+0.240539 0.000009
+storing pixels
+10  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.029408 blur 0.209751 sobelf 0.021374 total 0.260533
+process 0: duration1 duration2 0.260533 0.000009
+0.260533 0.000009
+storing pixels
+11  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.032330 blur 0.223618 sobelf 0.023231 total 0.279179
+process 0: duration1 duration2 0.279179 0.000011
+0.279179 0.000011
+storing pixels
+12  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.030551 blur 0.178773 sobelf 0.021020 total 0.230344
+process 0: duration1 duration2 0.230344 0.000010
+0.230344 0.000010
+storing pixels
+13  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.030612 blur 0.179690 sobelf 0.020856 total 0.231158
+process 0: duration1 duration2 0.231158 0.000008
+0.231158 0.000008
+storing pixels
+14  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.030753 blur 0.181960 sobelf 0.021104 total 0.233817
+process 0: duration1 duration2 0.233817 0.000009
+0.233817 0.000009
+storing pixels
+15  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.030192 blur 0.183495 sobelf 0.021128 total 0.234815
+process 0: duration1 duration2 0.234815 0.000009
+0.234815 0.000009
+storing pixels
+16  nodes :
+MPI rank 0 size 1
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.029678 blur 0.187212 sobelf 0.021686 total 0.238576
+process 0: duration1 duration2 0.238576 0.000009
+0.238576 0.000009
+storing pixels

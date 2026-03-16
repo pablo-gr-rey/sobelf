@@ -18,8 +18,8 @@ def parse_output(filename):
     
     return l1, l2
 
-times1, _ = parse_output("output/output-n1N1.out")
-times2og, lagog = parse_output("output/output-n2N2.out")
+times1, _ = parse_output("output/output-n1N1-opt.out")
+times2og, lagog = parse_output("output/output-n2N2-opt.out")
 
 # plot only 1/2
 
@@ -34,9 +34,9 @@ print (full_time)
 
 ax = plt.figure().gca()
 
-plt.plot(xs, times1[1::2], "g--", label="N=1, n=1 (reference)")
-plt.plot(xs, times2, "r", label="N=2, n=2 (not incl. comm)")
-plt.plot(xs, full_time, "b", label="N=2, n=2 (incl. comm)")
+plt.plot(xs, times1[1::2], "g--", label="N=1, n=1 (reference, opt.)")
+plt.plot(xs, times2, "r", label="N=2, n=2 (not incl. comm, opt.)")
+plt.plot(xs, full_time, "b", label="N=2, n=2 (incl. comm, opt.)")
 
 plt.legend()
 plt.xlabel("Number of total threads (n*t)")

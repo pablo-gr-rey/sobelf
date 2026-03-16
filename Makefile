@@ -3,7 +3,8 @@ HEADER_DIR=include
 OBJ_DIR=obj
 
 CC=mpicc
-CFLAGS=-O3 -I$(HEADER_DIR) -fopenmp
+NVCC=nvcc
+CFLAGS=-O3 -I$(HEADER_DIR) -fopenmp -L/usr/local/cuda-12.9.1/lib64 -I/usr/local/cuda-12.9.1/include -lcudart
 LDFLAGS=-lm
 
 SRC= dgif_lib.c \
@@ -24,7 +25,7 @@ OBJ= $(OBJ_DIR)/dgif_lib.o \
 	$(OBJ_DIR)/gifalloc.o \
 	$(OBJ_DIR)/main.o \
 	$(OBJ_DIR)/openbsd-reallocarray.o \
-	$(OBJ_DIR)/quantize.o
+	$(OBJ_DIR)/quantize.o \
 
 all: $(OBJ_DIR) sobelf
 
@@ -34,7 +35,10 @@ $(OBJ_DIR):
 $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
-sobelf:$(OBJ)
+obj/kernel.o: src/kernel.cu
+	nvcc -I. -c src/kernel.cu -o obj/kernel.o
+
+sobelf:$(OBJ) obj/kernel.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:

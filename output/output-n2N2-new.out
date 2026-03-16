@@ -1,0 +1,72 @@
+1  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 1.634006 0.107511
+process 0: duration1 duration2 1.714854 0.037867
+1.714854 0.037867
+storing pixels
+2  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 0.837527 0.040689
+process 0: duration1 duration2 0.860772 0.037855
+0.860772 0.037855
+storing pixels
+3  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 0.628957 0.062479
+process 0: duration1 duration2 0.656118 0.039742
+0.656118 0.039742
+storing pixels
+4  nodes :
+MPI rank 0 size 2
+MPI rank 1 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 0.437982 0.047676
+process 0: duration1 duration2 0.439542 0.058066
+0.439542 0.058066
+storing pixels
+5  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 0.432056 0.043597
+process 0: duration1 duration2 0.432636 0.057948
+0.432636 0.057948
+storing pixels
+6  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 0.337810 0.039873
+process 0: duration1 duration2 0.353148 0.048133
+0.353148 0.048133
+storing pixels
+7  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 0.341331 0.046670
+process 0: duration1 duration2 0.354885 0.040476
+0.354885 0.040476
+storing pixels
+8  nodes :
+MPI rank 1 size 2
+MPI rank 0 size 2
+./images/original/mandelbrot1.gif ; sobelf done
+./images/original/mandelbrot1.gif ; sobelf done
+process 1: duration1 duration2 0.268151 0.046387
+process 0: duration1 duration2 0.272645 0.057591
+0.272645 0.057591
+storing pixels
