@@ -17,11 +17,38 @@ __global__ void vecAddVector(int* res, int* a, int* b, int size)
         res[i] = a[i] + b[i];
 }
 
-__global__ void vecBlur(int* pixels, int* sum, int threshold)
+__global__ void vecBlur(int* pixels, int* sum, int width, int height, int size, int threshold)
 {
-    int threadNum = threadIdx.x + blockDim.x * threadIdx.y;
+    // we assume 1D work distribution
+    int num = threadIdx.x;
+    int blockSize = blockDim.x;
 
-    // we distribute the images
+    // we distribute the work
+
+    // first loop: compute sum over rows
+    // we get columns from num * height / size
+    // for (j = num * height / size; j < num ; j++)
+    // {
+    //     int index_deb = j * width;
+
+    //     // index 0 is the sum from 0 to size
+    //     sum[index_deb] = 0;
+    //     for (int k = 0; k <= size; k++)
+    //         sum[index_deb] += p[i][index_deb + k].b;
+
+    //     // from 1 to size, we add a new value
+    //     for (int k = 1; k <= size; k++)
+    //         sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b;
+
+    //     // from size+1 to width-size-1, we add a new value and remove one
+    //     for (int k = size + 1; k <= width - size - 1; k++)
+    //         sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b - p[i][index_deb + k - size - 1].b;
+
+    //     // from width-size to width-1, we remove one value
+    //     for (int k = width - size; k <= width - 1; k++)
+    //         sum[index_deb + k] = sum[index_deb + k - 1] - p[i][index_deb + k - size - 1].b;
+    // }
+
 }
 
 extern "C"

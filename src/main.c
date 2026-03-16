@@ -853,7 +853,29 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
                 n_iter++;
 
                 // compute sums over rows
-                for (j = 0; j < height; j++)
+                for (j = 0; j < height / 10 + size; j++)
+                {
+                    int index_deb = j * width;
+
+                    // index 0 is the sum from 0 to size
+                    sum[index_deb] = 0;
+                    for (int k = 0; k <= size; k++)
+                        sum[index_deb] += p[i][index_deb + k].b;
+
+                    // from 1 to size, we add a new value
+                    for (int k = 1; k <= size; k++)
+                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b;
+
+                    // from size+1 to width-size-1, we add a new value and remove one
+                    for (int k = size + 1; k <= width - size - 1; k++)
+                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b - p[i][index_deb + k - size - 1].b;
+
+                    // from width-size to width-1, we remove one value
+                    for (int k = width - size; k <= width - 1; k++)
+                        sum[index_deb + k] = sum[index_deb + k - 1] - p[i][index_deb + k - size - 1].b;
+                }
+
+                for (j = height * 0.9 - size; j < height; j++)
                 {
                     int index_deb = j * width;
 
@@ -876,15 +898,15 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
                 }
 
                 // test
-                for (int j = 0; j < height; j++)
-                    for (int k = 0; k < width; k++)
-                    {
-                        int ss = 0;
-                        for (int l = k >= size ? k - size : 0; l <= k + size && l < width; l++)
-                            ss += p[i][CONV(j, l, width)].b;
-                        if (ss != sum[CONV(j, k, width)])
-                            printf("BAD SUM at j %d k %d\n", j, k);
-                    }
+                // for (int j = 0; j < height; j++)
+                //     for (int k = 0; k < width; k++)
+                //     {
+                //         int ss = 0;
+                //         for (int l = k >= size ? k - size : 0; l <= k + size && l < width; l++)
+                //             ss += p[i][CONV(j, l, width)].b;
+                //         if (ss != sum[CONV(j, k, width)])
+                //             printf("BAD SUM at j %d k %d\n", j, k);
+                //     }
 
                 // update pixels value (over columns)
                 for (k = size; k < width - size; k++)
@@ -1211,7 +1233,7 @@ int main(int argc, char** argv)
 
     duration = DURATION(t1, t2);
 
-    run_kernel();
+    // run_kernel();
 
     MPI_Finalize();
 

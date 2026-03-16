@@ -1,104 +1,104 @@
 1  nodes :
-MPI rank 1 size 2
 MPI rank 0 size 2
+MPI rank 1 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.030187 blur 0.225301 sobelf 0.060419 total 0.315907
+gray 0.030724 blur 0.050625 sobelf 0.051697 total 0.133046
 sobelf done
-gray 0.031793 blur 0.231909 sobelf 0.051851 total 0.315553
-process 1: duration1 duration2 0.315907 0.039929
-process 0: duration1 duration2 0.315553 0.047587
-0.315553 0.047587
+gray 0.031993 blur 0.057858 sobelf 0.072533 total 0.162384
+process 1: duration1 duration2 0.162384 0.042071
+process 0: duration1 duration2 0.133046 0.157600
+0.133046 0.157600
 storing pixels
 2  nodes :
 MPI rank 1 size 2
 MPI rank 0 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.021848 blur 0.030752 sobelf 0.031317 total 0.083917
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.021806 blur 0.204016 sobelf 0.030973 total 0.256795
-sobelf done
-gray 0.022514 blur 0.213803 sobelf 0.043478 total 0.279795
-process 1: duration1 duration2 0.279795 0.048106
-process 0: duration1 duration2 0.256795 0.079356
-0.256795 0.079356
+gray 0.021356 blur 0.032599 sobelf 0.037425 total 0.091380
+process 1: duration1 duration2 0.091380 0.035682
+process 0: duration1 duration2 0.083917 0.127593
+0.083917 0.127593
 storing pixels
 3  nodes :
 MPI rank 1 size 2
 MPI rank 0 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.016551 blur 0.023370 sobelf 0.020412 total 0.060333
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.015996 blur 0.171674 sobelf 0.020071 total 0.207741
-sobelf done
-gray 0.016450 blur 0.177929 sobelf 0.025383 total 0.219762
-process 1: duration1 duration2 0.219762 0.046805
-process 0: duration1 duration2 0.207741 0.067662
-0.207741 0.067662
+gray 0.015781 blur 0.025985 sobelf 0.025202 total 0.066968
+process 1: duration1 duration2 0.066968 0.044259
+process 0: duration1 duration2 0.060333 0.127851
+0.060333 0.127851
 storing pixels
 4  nodes :
 MPI rank 1 size 2
 MPI rank 0 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.015413 blur 0.020071 sobelf 0.016233 total 0.051717
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.015310 blur 0.156188 sobelf 0.020428 total 0.191926
-sobelf done
-gray 0.015177 blur 0.174217 sobelf 0.016342 total 0.205736
-process 1: duration1 duration2 0.191926 0.041998
-process 0: duration1 duration2 0.205736 0.037922
-0.205736 0.037922
+gray 0.015095 blur 0.017956 sobelf 0.017922 total 0.050973
+process 1: duration1 duration2 0.050973 0.046813
+process 0: duration1 duration2 0.051717 0.127748
+0.051717 0.127748
 storing pixels
 5  nodes :
 MPI rank 1 size 2
 MPI rank 0 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.014754 blur 0.017413 sobelf 0.013441 total 0.045608
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.014755 blur 0.131504 sobelf 0.013410 total 0.159669
-sobelf done
-gray 0.014410 blur 0.134996 sobelf 0.018458 total 0.167864
-process 1: duration1 duration2 0.167864 0.037949
-process 0: duration1 duration2 0.159669 0.057730
-0.159669 0.057730
+gray 0.014400 blur 0.018801 sobelf 0.018521 total 0.051722
+process 1: duration1 duration2 0.051722 0.038509
+process 0: duration1 duration2 0.045608 0.128045
+0.045608 0.128045
 storing pixels
 6  nodes :
 MPI rank 1 size 2
 MPI rank 0 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.014971 blur 0.016282 sobelf 0.012688 total 0.043941
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.014769 blur 0.125695 sobelf 0.012584 total 0.153048
-sobelf done
-gray 0.014328 blur 0.143585 sobelf 0.015557 total 0.173470
-process 1: duration1 duration2 0.173470 0.051940
-process 0: duration1 duration2 0.153048 0.079844
-0.153048 0.079844
+gray 0.014478 blur 0.016087 sobelf 0.013929 total 0.044494
+process 1: duration1 duration2 0.044494 0.041268
+process 0: duration1 duration2 0.043941 0.127914
+0.043941 0.127914
 storing pixels
 7  nodes :
 MPI rank 1 size 2
 MPI rank 0 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+sobelf done
+gray 0.015746 blur 0.016632 sobelf 0.012537 total 0.044915
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.015719 blur 0.127585 sobelf 0.012649 total 0.155953
-sobelf done
-gray 0.015646 blur 0.133089 sobelf 0.015565 total 0.164300
-process 1: duration1 duration2 0.164300 0.044413
-process 0: duration1 duration2 0.155953 0.068128
-0.155953 0.068128
+gray 0.015246 blur 0.016235 sobelf 0.013496 total 0.044977
+process 1: duration1 duration2 0.044977 0.048443
+process 0: duration1 duration2 0.044915 0.127741
+0.044915 0.127741
 storing pixels
 8  nodes :
-MPI rank 1 size 2
 MPI rank 0 size 2
-./images/original/mandelbrot1.gif ; size = 5 threshold = 20
+MPI rank 1 size 2
 ./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.014327 blur 0.128439 sobelf 0.009953 total 0.152719
+gray 0.014379 blur 0.014645 sobelf 0.010225 total 0.039249
+./images/original/mandelbrot1.gif ; size = 5 threshold = 20
 sobelf done
-gray 0.013797 blur 0.139385 sobelf 0.012792 total 0.165974
-process 1: duration1 duration2 0.165974 0.049480
-process 0: duration1 duration2 0.152719 0.070597
-0.152719 0.070597
+gray 0.013895 blur 0.013969 sobelf 0.013006 total 0.040870
+process 1: duration1 duration2 0.040870 0.049748
+process 0: duration1 duration2 0.039249 0.131968
+0.039249 0.131968
 storing pixels
