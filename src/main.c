@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include "string.h"
 #include <math.h>
 #include <stdint.h>
 #include <sys/time.h>
@@ -25,6 +26,7 @@
 
 // #define ROUND_ROBIN
 #define FAST_BLUR
+#define KERNEL_BLUR
 
 // defines the images through which rank mpi_rank should go
 #ifdef ROUND_ROBIN
@@ -48,6 +50,8 @@ typedef struct animated_gif
     int* width; /* Width of each image */
     int* height; /* Height of each image */
     pixel** p; /* Pixels of each image */
+    // int
+    int** p_gray;   /* pixels of each image, after grayscale conversion */
     uint8_t** output;   /* compressed output: i-th pixel of output image k goes into output[k][i/8] & (1 << (i%8))  (ie. we simply use one bit per output pixel, since they are black or white) */
     GifFileType* g; /* Internal representation.
                          DO NOT MODIFY */
@@ -55,7 +59,7 @@ typedef struct animated_gif
 
 int mpi_rank, mpi_size;
 
-void run_kernel();
+void run_kernel(int* pixels, int width, int height, int size, int threshold);
 
 // Load a GIF image from a file and return a structure of type animated_gif.
 animated_gif* load_pixels(char* filename)
@@ -67,6 +71,7 @@ animated_gif* load_pixels(char* filename)
     int* width;
     int* height;
     pixel** p;
+    int** p_gray;
     uint8_t** output;
     int i;
     animated_gif* image;
@@ -145,6 +150,7 @@ animated_gif* load_pixels(char* filename)
 
     /* Allocate the array of pixels to be returned */
     p = (pixel**) malloc(n_images * sizeof(pixel*));
+    p_gray = (int**) malloc(n_images * sizeof(int*));
     if (p == NULL)
     {
         fprintf(stderr, "Unable to allocate array of %d images\n",
@@ -175,12 +181,14 @@ animated_gif* load_pixels(char* filename)
 
         // allocate one big array for the whole rank
         p[r * n_images / mpi_size] = (pixel*) malloc(nPixels * sizeof(pixel));
+        p_gray[r * n_images / mpi_size] = (int*) malloc(nPixels * sizeof(int));
         output[r * n_images / mpi_size] = (uint8_t*) calloc((nPixels + 7) / 8 + n_images, 1);   // we initialize it to zero
 
         // update pointers for consecutive images
         for (int i = r * n_images / mpi_size; i < (r + 1) * n_images / mpi_size - 1; i++)
         {
             p[i + 1] = p[i] + width[i] * height[i];
+            p_gray[i + 1] = p_gray[i] + width[i] * height[i];
             output[i + 1] = output[i] + (width[i] * height[i] + 7) / 8;
         }
     }
@@ -238,6 +246,7 @@ animated_gif* load_pixels(char* filename)
     image->width = width;
     image->height = height;
     image->p = p;
+    image->p_gray = p_gray;
     image->g = g;
     image->output = output;
 
@@ -642,8 +651,9 @@ void apply_gray_filter(animated_gif* image)
 {
     int i, j;
     pixel** p;
-
+    int** p_gray = image->p_gray;
     p = image->p;
+
 
 #pragma omp parallel private(i,j)
     {
@@ -664,7 +674,7 @@ void apply_gray_filter(animated_gif* image)
 
                 // p[i][j].r = moy;
                 // p[i][j].g = moy;
-                p[i][j].b = moy;
+                p_gray[i][j] = moy;
             }
         }
     }
@@ -701,13 +711,13 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
     int end = 0;
     int n_iter = 0;
 
-    pixel** p;
+    int** p;
     pixel* new;
 
     printf("size = %d threshold = %d\n", size, threshold);
 
     /* Get the pixels of all images */
-    p = image->p;
+    p = image->p_gray;
 
     /* Process all images */
 #pragma omp parallel private(i,j,k,width,height, end, n_iter, new)
@@ -723,7 +733,7 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
             height = image->height[i];
 
             /* Allocate array of new pixels */
-            new = (pixel*) malloc(width * height * sizeof(pixel));
+            // new = (pixel*) malloc(width * height * sizeof(pixel));
 
             // pixel* neww = (pixel*) malloc(width * height * sizeof(pixel));
             // for (int j = 0; j < height; j++)
@@ -860,19 +870,19 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
                     // index 0 is the sum from 0 to size
                     sum[index_deb] = 0;
                     for (int k = 0; k <= size; k++)
-                        sum[index_deb] += p[i][index_deb + k].b;
+                        sum[index_deb] += p[i][index_deb + k];
 
                     // from 1 to size, we add a new value
                     for (int k = 1; k <= size; k++)
-                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b;
+                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size];
 
                     // from size+1 to width-size-1, we add a new value and remove one
                     for (int k = size + 1; k <= width - size - 1; k++)
-                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b - p[i][index_deb + k - size - 1].b;
+                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size] - p[i][index_deb + k - size - 1];
 
                     // from width-size to width-1, we remove one value
                     for (int k = width - size; k <= width - 1; k++)
-                        sum[index_deb + k] = sum[index_deb + k - 1] - p[i][index_deb + k - size - 1].b;
+                        sum[index_deb + k] = sum[index_deb + k - 1] - p[i][index_deb + k - size - 1];
                 }
 
                 for (j = height * 0.9 - size; j < height; j++)
@@ -882,19 +892,19 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
                     // index 0 is the sum from 0 to size
                     sum[index_deb] = 0;
                     for (int k = 0; k <= size; k++)
-                        sum[index_deb] += p[i][index_deb + k].b;
+                        sum[index_deb] += p[i][index_deb + k];
 
                     // from 1 to size, we add a new value
                     for (int k = 1; k <= size; k++)
-                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b;
+                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size];
 
                     // from size+1 to width-size-1, we add a new value and remove one
                     for (int k = size + 1; k <= width - size - 1; k++)
-                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size].b - p[i][index_deb + k - size - 1].b;
+                        sum[index_deb + k] = sum[index_deb + k - 1] + p[i][index_deb + k + size] - p[i][index_deb + k - size - 1];
 
                     // from width-size to width-1, we remove one value
                     for (int k = width - size; k <= width - 1; k++)
-                        sum[index_deb + k] = sum[index_deb + k - 1] - p[i][index_deb + k - size - 1].b;
+                        sum[index_deb + k] = sum[index_deb + k - 1] - p[i][index_deb + k - size - 1];
                 }
 
                 // test
@@ -903,7 +913,7 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
                 //     {
                 //         int ss = 0;
                 //         for (int l = k >= size ? k - size : 0; l <= k + size && l < width; l++)
-                //             ss += p[i][CONV(j, l, width)].b;
+                //             ss += p[i][CONV(j, l, width)];
                 //         if (ss != sum[CONV(j, k, width)])
                 //             printf("BAD SUM at j %d k %d\n", j, k);
                 //     }
@@ -919,10 +929,10 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
                     for (int j = size; j < height / 10 - size; j++)
                     {
                         int new_val = total_sum / ((2 * size + 1) * (2 * size + 1));
-                        if (p[i][CONV(j, k, width)].b > new_val + threshold || p[i][CONV(j, k, width)].b < new_val - threshold)
+                        if (p[i][CONV(j, k, width)] > new_val + threshold || p[i][CONV(j, k, width)] < new_val - threshold)
                             end = 0;
 
-                        p[i][CONV(j, k, width)].b = new_val;
+                        p[i][CONV(j, k, width)] = new_val;
 
                         total_sum += sum[CONV(j + size + 1, k, width)] - sum[CONV(j - size, k, width)];
                     }
@@ -935,10 +945,10 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
                     for (int j = height - 1 - size; j >= height * 0.9 + size; j--)
                     {
                         int new_val = total_sum / ((2 * size + 1) * (2 * size + 1));
-                        if (p[i][CONV(j, k, width)].b > new_val + threshold || p[i][CONV(j, k, width)].b < new_val - threshold)
+                        if (p[i][CONV(j, k, width)] > new_val + threshold || p[i][CONV(j, k, width)] < new_val - threshold)
                             end = 0;
 
-                        p[i][CONV(j, k, width)].b = new_val;
+                        p[i][CONV(j, k, width)] = new_val;
 
                         total_sum += sum[CONV(j - size - 1, k, width)] - sum[CONV(j + size, k, width)];
                     }
@@ -951,7 +961,25 @@ void apply_blur_filter(animated_gif* image, int size, int threshold)
             printf("BLUR: number of iterations for image %d\n", n_iter);
 #endif
 
-            free(new);
+            // free(new);
+        }
+    }
+}
+
+void apply_kernel_blur_filter(animated_gif* image, int size, int threshold)
+{
+    int i, j, k;
+    // int** p = malloc(image->n_images * sizeof);
+
+    /* Get the pixels of all images */
+
+    /* Process all images */
+#pragma omp parallel private(i,j,k)
+    {
+#pragma omp for schedule(static)
+        for (LOOP_IMAGE)
+        {
+            run_kernel(image->p_gray[i], image->width[i], image->height[0], 5, 20);
         }
     }
 }
@@ -961,9 +989,9 @@ void apply_sobel_filter(animated_gif* image)
     int i, j, k;
     int width, height;
 
-    pixel** p;
+    int** p;
 
-    p = image->p;
+    p = image->p_gray;
 
 #pragma omp parallel private(i,j,k,width,height)
     {
@@ -992,15 +1020,15 @@ void apply_sobel_filter(animated_gif* image)
                     float deltaY_blue;
                     float val_blue;
 
-                    pixel_blue_no = p[i][CONV(j - 1, k - 1, width)].b;
-                    pixel_blue_n = p[i][CONV(j - 1, k, width)].b;
-                    pixel_blue_ne = p[i][CONV(j - 1, k + 1, width)].b;
-                    pixel_blue_so = p[i][CONV(j + 1, k - 1, width)].b;
-                    pixel_blue_s = p[i][CONV(j + 1, k, width)].b;
-                    pixel_blue_se = p[i][CONV(j + 1, k + 1, width)].b;
-                    pixel_blue_o = p[i][CONV(j, k - 1, width)].b;
-                    pixel_blue = p[i][CONV(j, k, width)].b;
-                    pixel_blue_e = p[i][CONV(j, k + 1, width)].b;
+                    pixel_blue_no = p[i][CONV(j - 1, k - 1, width)];
+                    pixel_blue_n = p[i][CONV(j - 1, k, width)];
+                    pixel_blue_ne = p[i][CONV(j - 1, k + 1, width)];
+                    pixel_blue_so = p[i][CONV(j + 1, k - 1, width)];
+                    pixel_blue_s = p[i][CONV(j + 1, k, width)];
+                    pixel_blue_se = p[i][CONV(j + 1, k + 1, width)];
+                    pixel_blue_o = p[i][CONV(j, k - 1, width)];
+                    pixel_blue = p[i][CONV(j, k, width)];
+                    pixel_blue_e = p[i][CONV(j, k + 1, width)];
 
                     deltaX_blue = -pixel_blue_no + pixel_blue_ne - 2 * pixel_blue_o + 2 * pixel_blue_e - pixel_blue_so + pixel_blue_se;
 
@@ -1112,7 +1140,19 @@ int main(int argc, char** argv)
     gettimeofday(&t4, NULL);
 
     /* Apply blur filter with convergence value */
+#ifdef KERNEL_BLUR
+    apply_kernel_blur_filter(image, 5, 20);
+#else
     apply_blur_filter(image, 5, 20);
+#endif
+
+    // for (int j = 0; j < image->height[0]; j++)
+    //     for (int k = 0; k < image->width[0]; k++)
+    //         if (res[CONV(j, k, image->width[0])] != image->p_gray[0][CONV(j, k, image->width[0])])
+    //             printf("INVALID value at j %d k %d (got %d, expected %d)\n", j, k, res[CONV(j, k, image->width[0])] != image->p_gray[0][CONV(j, k, image->width[0])]);
+    // printf("ALL OK\n");
+
+    // return 0;
 
     gettimeofday(&t5, NULL);
 
@@ -1127,18 +1167,6 @@ int main(int argc, char** argv)
     printf("gray %lf blur %lf sobelf %lf total %lf\n", DURATION(t1, t4), DURATION(t4, t5), DURATION(t5, t2), DURATION(t1, t2));
 
     // now, we need to gather all images (there are ceil(n_images / mpi_size) per node at most)
-
-    // int* tt1 = malloc(50 * sizeof(int)), * tt2 = malloc(100 * sizeof(int)), * t3 = malloc(100 * sizeof(int));
-    // int displs[2] = { 0, (t3 + 4) - tt1 };
-    // int recvcounts[2] = { 1, 1 };
-    // int val = mpi_rank ? 12 : 9;
-    // if (mpi_rank == 0)
-    // {
-    //     MPI_Gatherv(&val, 1, MPI_INT, tt1, recvcounts, displs, MPI_INT, 0, MPI_COMM_WORLD);
-    //     printf("%d %d\n", tt1[0], t3[4]);
-    // }
-    // else
-    //     MPI_Gatherv(&val, 1, MPI_INT, NULL, NULL, NULL, NULL, 0, MPI_COMM_WORLD);
 
 #ifdef ROUND_ROBIN
     // the images are treated in a round-robin fashion: for 8 images and 3 nodes, it will be 0 1 2 0 1 2 0 1
@@ -1232,8 +1260,6 @@ int main(int argc, char** argv)
     gettimeofday(&t2, NULL);
 
     duration = DURATION(t1, t2);
-
-    // run_kernel();
 
     MPI_Finalize();
 
