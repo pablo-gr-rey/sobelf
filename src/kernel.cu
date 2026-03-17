@@ -137,7 +137,6 @@ void run_kernel(int* pixels, int width, int height, int size, int threshold)
     cudaMalloc((void**) &d_pixels, width * height * sizeof(int));
     cudaMalloc((void**) &d_sum, width * height * sizeof(int));
 
-
     cudaMemcpy(d_pixels, pixels, width * height * sizeof(int), cudaMemcpyHostToDevice);
 
     gettimeofday(&t2, NULL);

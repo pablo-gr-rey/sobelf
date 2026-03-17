@@ -26,7 +26,7 @@
 
 // #define ROUND_ROBIN
 #define FAST_BLUR
-#define KERNEL_BLUR
+// #define KERNEL_BLUR
 
 // defines the images through which rank mpi_rank should go
 #ifdef ROUND_ROBIN
@@ -1094,8 +1094,6 @@ int main(int argc, char** argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    printf("MPI rank %d size %d\n", mpi_rank, mpi_size);
-
     char* input_filename;
     char* output_filename;
     animated_gif* image;
@@ -1127,8 +1125,6 @@ int main(int argc, char** argv)
 #if FULL_VERBOSE
     printf("GIF loaded from file %s with %d image(s) in %lf s\n",
         input_filename, image->n_images, duration);
-#else
-    printf("%s ; ", input_filename);
 #endif
 
     /* FILTER Timer start */
@@ -1146,6 +1142,7 @@ int main(int argc, char** argv)
     apply_blur_filter(image, 5, 20);
 #endif
 
+    // old test to check that the GPU blur returns the same values as the CPU blur
     // for (int j = 0; j < image->height[0]; j++)
     //     for (int k = 0; k < image->width[0]; k++)
     //         if (res[CONV(j, k, image->width[0])] != image->p_gray[0][CONV(j, k, image->width[0])])

@@ -1,0 +1,3 @@
+- make, essayer sur mandelbrot2 avec et sans kernel
+- parler de gen_cmd.py (plus pratique)
+- tracer avec display_graph.py sur un autre gif (./test_temps.sh en modifiant les paramètres)

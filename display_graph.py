@@ -18,8 +18,8 @@ def parse_output(filename):
     
     return l1, l2
 
-times1, _ = parse_output("output/output-n1N1-opt.out")
-times2og, lagog = parse_output("output/output-n2N2-opt.out")
+times1, _ = parse_output("temp/output-n1N1.out")
+times2og, lagog = parse_output("temp/output-n2N2.out")
 
 # plot only 1/2
 
